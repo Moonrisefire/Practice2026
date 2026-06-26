@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vorstu.iml" filepath="$PROJECT_DIR$/.idea/modules/vorstu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vorstu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/vorstu.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vorstu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/vorstu.test.iml" />
+    </modules>
+  </component>
+</project>
