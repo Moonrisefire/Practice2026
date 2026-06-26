@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование API Студентов</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="p-8 text-gray-800">
+
+<div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    <!-- Шапка -->
+    <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-white">Управление студентами</h1>
+        <span id="status" class="text-sm bg-blue-800 px-2 py-1 rounded text-white">Готов</span>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Левая колонка: Форма добавления/редактирования -->
+        <div class="md:col-span-1 bg-gray-50 p-4 rounded-lg border border-gray-200 h-fit">
+            <h2 id="formTitle" class="text-lg font-semibold mb-4 border-b pb-2">Добавить студента</h2>
+
+            <form id="studentForm" onsubmit="saveStudent(event)">
+                <!-- Скрытое поле для ID (используется при редактировании) -->
+                <input type="hidden" id="studentId">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ФИО</label>
+                    <input type="text" id="fio" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Группа</label>
+                    <input type="text" id="group" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+                    <input type="text" id="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                        Сохранить
+                    </button>
+                    <button type="button" id="cancelBtn" onclick="resetForm()" class="hidden w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Правая колонка: Таблица и фильтры -->
+        <div class="md:col-span-2">
+            <!-- Фильтр -->
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="filterGroup" placeholder="Группа (напр. VM)" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="filterStudents()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                    Найти
+                </button>
+                <button onclick="loadStudents()" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                    Сбросить
+                </button>
+            </div>
+
+            <!-- Таблица -->
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Группа</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Телефон</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody id="studentsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Данные будут загружены сюда -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Индикатор загрузки/пустоты -->
+            <div id="emptyState" class="text-center py-8 text-gray-500 hidden">
+                Нет данных для отображения
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080/api/base/students';
+
+    // Функция для вывода статуса в шапку
+    function setStatus(msg, isError = false) {
+        const el = document.getElementById('status');
+        el.textContent = msg;
+        el.className = `text-sm px-2 py-1 rounded text-white ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+        setTimeout(() => {
+            el.textContent = 'Готов';
+            el.className = 'text-sm bg-blue-800 px-2 py-1 rounded text-white';
+        }, 3000);
+    }
+
+    // Загрузка всех студентов (GET)
+    async function loadStudents() {
+        document.getElementById('filterGroup').value = '';
+        try {
+            const response = await fetch(API_BASE);
+            const data = await response.json();
+            renderTable(data);
+        } catch (error) {
+            setStatus('Ошибка подключения к серверу', true);
+            console.error(error);
+        }
+    }
+
+    // Фильтрация студентов (GET)
+    async function filterStudents() {
+        const group = document.getElementById('filterGroup').value.trim();
+        if (!group) return loadStudents();
+
+        try {
+            const response = await fetch(`${API_BASE}/filter?group=${encodeURIComponent(group)}`);
+            const data = await response.json();
+            renderTable(data);
+        } catch (error) {
+            setStatus('Ошибка фильтрации', true);
+        }
+    }
+
+    // Отрисовка таблицы
+    function renderTable(students) {
+        const tbody = document.getElementById('studentsTableBody');
+        const emptyState = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+
+        if (!students || students.length === 0) {
+            emptyState.classList.remove('hidden');
+            return;
+        }
+        emptyState.classList.add('hidden');
+
+        students.forEach(student => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${student.id}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${student.fio}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${student.group}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${student.phoneNumber}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="editStudent(${student.id}, '${student.fio}', '${student.group}', '${student.phoneNumber}')" class="text-indigo-600 hover:text-indigo-900 mr-3">Изменить</button>
+                    <button onclick="deleteStudent(${student.id})" class="text-red-600 hover:text-red-900">Удалить</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Сохранение (POST для новых, PUT для существующих)
+    async function saveStudent(event) {
+        event.preventDefault(); // Останавливаем перезагрузку страницы
+
+        const id = document.getElementById('studentId').value;
+        const student = {
+            fio: document.getElementById('fio').value,
+            group: document.getElementById('group').value,
+            phoneNumber: document.getElementById('phone').value
+        };
+
+        let method = 'POST';
+        if (id) {
+            method = 'PUT';
+            student.id = parseInt(id); // Если редактируем, добавляем ID
+        }
+
+        try {
+            const response = await fetch(API_BASE, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(student)
+            });
+
+            if (response.ok) {
+                setStatus(id ? 'Студент обновлен' : 'Студент добавлен');
+                resetForm();
+                loadStudents(); // Обновляем таблицу
+            } else {
+                setStatus('Ошибка сохранения', true);
+            }
+        } catch (error) {
+            setStatus('Ошибка сети', true);
+        }
+    }
+
+    // Подготовка формы к редактированию
+    function editStudent(id, fio, group, phone) {
+        document.getElementById('formTitle').textContent = 'Редактировать студента';
+        document.getElementById('studentId').value = id;
+        document.getElementById('fio').value = fio;
+        document.getElementById('group').value = group;
+        document.getElementById('phone').value = phone;
+
+        document.getElementById('submitBtn').textContent = 'Обновить';
+        document.getElementById('cancelBtn').classList.remove('hidden');
+    }
+
+    // Удаление студента (DELETE)
+    async function deleteStudent(id) {
+        if (!confirm('Вы уверены, что хотите удалить этого студента?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                setStatus('Студент удален');
+                loadStudents();
+            } else {
+                setStatus('Ошибка удаления', true);
+            }
+        } catch (error) {
+            setStatus('Ошибка сети', true);
+        }
+    }
+
+    // Сброс формы
+    function resetForm() {
+        document.getElementById('studentForm').reset();
+        document.getElementById('studentId').value = '';
+        document.getElementById('formTitle').textContent = 'Добавить студента';
+        document.getElementById('submitBtn').textContent = 'Сохранить';
+        document.getElementById('cancelBtn').classList.add('hidden');
+    }
+
+    // Загрузить данные при открытии страницы
+    window.onload = loadStudents;
+</script>
+</body>
+</html>
