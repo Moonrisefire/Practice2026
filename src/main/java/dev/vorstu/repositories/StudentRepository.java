@@ -1,8 +1,12 @@
 package dev.vorstu.repositories;
 
-import dev.vorstu.dto.Student;
-import org.springframework.data.repository.CrudRepository;
+import dev.vorstu.models.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface StudentRepository extends CrudRepository<Student, Long> {
-    Iterable<Student> findByGroup(String group);
+import java.util.List;
+
+@Repository
+public interface StudentRepository extends JpaRepository<Student, Long> {
+    List<Student> findAllByGroupName(String group);
 }
