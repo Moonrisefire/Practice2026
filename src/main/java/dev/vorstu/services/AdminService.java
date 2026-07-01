@@ -10,6 +10,7 @@ import dev.vorstu.models.Teacher;
 import dev.vorstu.repositories.StudentRepository;
 import dev.vorstu.repositories.TeacherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,8 @@ public class AdminService {
     private final TeacherRepository teacherRepository;
     private final StudentMapper studentMapper;
     private final TeacherMapper teacherMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<StudentDto> getAllStudents() {
@@ -61,7 +64,9 @@ public class AdminService {
     public StudentDto createStudent(StudentDto studentDto) {
         Student student = studentMapper.toEntity(studentDto);
         student.setRole(Role.STUDENT);
-        student.setPassword("temp_password_123"); /// TODO Временно хардкодим пароль
+
+        student.setPassword(passwordEncoder.encode(studentDto.getPassword()));
+
         return studentMapper.toDto(studentRepository.save(student));
     }
 
@@ -72,6 +77,10 @@ public class AdminService {
 
         studentMapper.updateStudentFromDto(updateData, student);
 
+        if (updateData.getPassword() != null && !updateData.getPassword().isBlank()) {
+            student.setPassword(passwordEncoder.encode(updateData.getPassword()));
+        }
+
         return studentMapper.toDto(studentRepository.save(student));
     }
 
@@ -79,7 +88,7 @@ public class AdminService {
     public TeacherDto createTeacher(TeacherDto teacherDto) {
         Teacher teacher = teacherMapper.toEntity(teacherDto);
         teacher.setRole(Role.TEACHER);
-        teacher.setPassword("temp_password_123"); /// TODO Временно хардкодим пароль
+        teacher.setPassword(passwordEncoder.encode(teacherDto.getPassword()));
         return teacherMapper.toDto(teacherRepository.save(teacher));
     }
 
@@ -89,6 +98,10 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("Преподаватель не найден"));
 
         teacherMapper.updateTeacherFromDto(updateData, teacher);
+
+        if (updateData.getPassword() != null && !updateData.getPassword().isBlank()) {
+            teacher.setPassword(passwordEncoder.encode(updateData.getPassword()));
+        }
 
         return teacherMapper.toDto(teacherRepository.save(teacher));
     }

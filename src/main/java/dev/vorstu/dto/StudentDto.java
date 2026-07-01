@@ -17,4 +17,8 @@ public class StudentDto {
 
     @NotBlank(message = "Название группы не может быть пустым")
     private String groupName;
+
+    @NotBlank(message = "Пароль обязателен при создании")
+    @Size(min = 4, message = "Пароль должен быть не менее 4 символов")
+    private String password;
 }

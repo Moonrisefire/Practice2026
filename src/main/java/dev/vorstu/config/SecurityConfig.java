@@ -33,8 +33,6 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        /// TODO Удалить
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/students/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/teachers/**").hasRole("TEACHER")

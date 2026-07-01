@@ -11,7 +11,4 @@ import lombok.EqualsAndHashCode;
 @Table(name = "admins")
 @EqualsAndHashCode(callSuper = true)
 public class Admin extends BaseUser {
-
-    @Column(name = "admin_level", nullable = false)
-    private String adminLevel; // Например: "GLOBAL", "FACULTY"
 }

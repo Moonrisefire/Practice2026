@@ -26,13 +26,15 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentDto updateSelf(Long studentId, StudentDto updateData) {
-        Student student = studentRepository.findById(studentId)
+    public StudentDto updateSelf(Long requestedId, String tokenUsername, StudentDto updateData) {
+        Student student = studentRepository.findById(requestedId)
                 .orElseThrow(() -> new RuntimeException("Студент не найден"));
 
-        if (updateData.getFio() != null) {
-            student.setFio(updateData.getFio());
+        if (!student.getUsername().equals(tokenUsername)) {
+            throw new RuntimeException("Нет доступа: вы можете редактировать только свой профиль");
         }
+
+        studentMapper.updateStudentFromDto(updateData, student);
 
         return studentMapper.toDto(studentRepository.save(student));
     }

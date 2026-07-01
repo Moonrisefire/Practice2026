@@ -3,6 +3,7 @@ package dev.vorstu.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.Set;
 
@@ -21,4 +22,8 @@ public class TeacherDto {
     private String phone;
 
     private Set<String> assignedGroups;
+
+    @NotBlank(message = "Пароль обязателен при создании")
+    @Size(min = 4, message = "Пароль должен быть не менее 4 символов")
+    private String password;
 }

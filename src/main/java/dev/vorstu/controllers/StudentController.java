@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -24,15 +25,11 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<StudentDto> updateSelf(
             @PathVariable Long id,
-            @Valid @RequestBody StudentDto updateData) {
+            @Valid @RequestBody StudentDto updateData,
+            Principal principal) {
 
-        /// TODO Хардкод. Потом заменю на извлечение ID из JWT токена
-        Long currentUserId = 1L;
+        String currentUsername = principal.getName();
 
-        if (!currentUserId.equals(id)) {
-            throw new RuntimeException("Нет доступа: вы можете редактировать только свой профиль");
-        }
-
-        return ResponseEntity.ok(studentService.updateSelf(currentUserId, updateData));
+        return ResponseEntity.ok(studentService.updateSelf(id, currentUsername, updateData));
     }
 }
