@@ -9,7 +9,4 @@ public class AdminDto {
     private Long id;
     private String username;
     private Role role;
-
-    @NotBlank(message = "Уровень прав администратора не может быть пустым")
-    private String adminLevel;
 }

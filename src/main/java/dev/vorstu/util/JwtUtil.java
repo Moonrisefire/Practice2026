@@ -29,8 +29,8 @@ public class JwtUtil {
 
     public String generateAccessToken(BaseUser user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().name()); // Зашиваем роль прямо в токен!
-        claims.put("userId", user.getId());        // И ID пользователя
+        claims.put("role", user.getRole().name());
+        claims.put("userId", user.getId());
         return buildToken(claims, user.getUsername(), accessTokenExpiration);
     }
 
