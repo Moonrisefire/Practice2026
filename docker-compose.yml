@@ -11,6 +11,21 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d university_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - university_net
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: vorstu_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - university_net
 
@@ -24,8 +39,14 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/university_db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin_password
+      - SPRING_MAIL_HOST=mailhog
+      - SPRING_MAIL_PORT=1025
+      - REGISTRATION_CONFIRM_BASE_URL=http://localhost:8080/api/auth/confirm
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - university_net
 

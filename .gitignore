@@ -1,28 +1,87 @@
 # Gradle
 .gradle/
 build/
-!gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local toolchain downloads (portable JDK, Gradle, etc.)
+.tools/
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+!gradle/wrapper/gradle-wrapper.jar
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
 
 # IntelliJ IDEA
 .idea/
-*.iws
 *.iml
 *.ipr
+*.iws
 out/
 
-# Логи и временные файлы
+# Eclipse / STS
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code / Cursor
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+
+# Logs and temp files
 *.log
 *.tmp
 *.bak
+*.swp
+*~
 logs/
 
-# Секреты и данные БД
-application-local.properties
+# Environment and secrets
 .env
+.env.*
+!.env.example
+application-local.properties
+application-*.local.properties
+**/secrets/
 
-# Docker
+# Docker local data
 postgres_data/
+pgdata/
 
 # OS-specific
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# Test artifacts
+*.exec
+.jacoco/
+
+# Optional: local CSV uploads for manual testing
+registrations.csv

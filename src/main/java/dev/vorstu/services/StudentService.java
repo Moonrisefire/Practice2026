@@ -1,6 +1,8 @@
 package dev.vorstu.services;
 
 import dev.vorstu.dto.StudentDto;
+import dev.vorstu.dto.StudentSelfUpdateDto;
+import dev.vorstu.exceptions.ResourceNotFoundException;
 import dev.vorstu.mappers.StudentMapper;
 import dev.vorstu.models.Student;
 import dev.vorstu.repositories.StudentRepository;
@@ -19,22 +21,21 @@ public class StudentService {
     private final StudentMapper studentMapper;
 
     @Transactional(readOnly = true)
-    public List<StudentDto> getClassmates(String groupName) {
-        return studentRepository.findAllByGroupName(groupName).stream()
+    public List<StudentDto> getClassmates(String currentUsername) {
+        Student currentStudent = studentRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Студент не найден"));
+
+        return studentRepository.findAllByGroupName(currentStudent.getGroupName()).stream()
                 .map(studentMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public StudentDto updateSelf(Long requestedId, String tokenUsername, StudentDto updateData) {
-        Student student = studentRepository.findById(requestedId)
-                .orElseThrow(() -> new RuntimeException("Студент не найден"));
+    public StudentDto updateSelf(String currentUsername, StudentSelfUpdateDto updateData) {
+        Student student = studentRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Студент не найден"));
 
-        if (!student.getUsername().equals(tokenUsername)) {
-            throw new RuntimeException("Нет доступа: вы можете редактировать только свой профиль");
-        }
-
-        studentMapper.updateStudentFromDto(updateData, student);
+        student.setFio(updateData.getFio());
 
         return studentMapper.toDto(studentRepository.save(student));
     }

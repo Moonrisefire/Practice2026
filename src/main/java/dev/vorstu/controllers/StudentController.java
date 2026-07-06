@@ -1,11 +1,16 @@
 package dev.vorstu.controllers;
 
 import dev.vorstu.dto.StudentDto;
+import dev.vorstu.dto.StudentSelfUpdateDto;
 import dev.vorstu.services.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 import java.util.List;
@@ -17,19 +22,15 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    @GetMapping
-    public ResponseEntity<List<StudentDto>> getClassmates(@RequestParam(name = "group") String groupName) {
-        return ResponseEntity.ok(studentService.getClassmates(groupName));
+    @GetMapping("/me/classmates")
+    public ResponseEntity<List<StudentDto>> getClassmates(Principal principal) {
+        return ResponseEntity.ok(studentService.getClassmates(principal.getName()));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/me")
     public ResponseEntity<StudentDto> updateSelf(
-            @PathVariable Long id,
-            @Valid @RequestBody StudentDto updateData,
+            @Valid @RequestBody StudentSelfUpdateDto updateData,
             Principal principal) {
-
-        String currentUsername = principal.getName();
-
-        return ResponseEntity.ok(studentService.updateSelf(id, currentUsername, updateData));
+        return ResponseEntity.ok(studentService.updateSelf(principal.getName(), updateData));
     }
 }

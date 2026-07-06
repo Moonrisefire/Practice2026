@@ -2,6 +2,7 @@ package dev.vorstu.services;
 
 import dev.vorstu.dto.AuthRequest;
 import dev.vorstu.dto.AuthResponse;
+import dev.vorstu.exceptions.UnauthorizedException;
 import dev.vorstu.models.BaseUser;
 import dev.vorstu.repositories.UserRepository;
 import dev.vorstu.util.JwtUtil;
@@ -19,36 +20,38 @@ public class AuthService {
 
     public AuthResponse authenticate(AuthRequest request) {
         BaseUser user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Неверный логин или пароль"));
+                .orElseThrow(() -> new UnauthorizedException("Неверный логин или пароль"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Неверный логин или пароль");
+            throw new UnauthorizedException("Неверный логин или пароль");
         }
 
-        String jwtToken = jwtUtil.generateAccessToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
-
         return AuthResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
+                .accessToken(jwtUtil.generateAccessToken(user))
+                .refreshToken(jwtUtil.generateRefreshToken(user))
                 .build();
     }
 
     public AuthResponse refreshToken(String refreshToken) {
-        String username = jwtUtil.extractUsername(refreshToken);
-
-        if (username != null) {
-            BaseUser user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-            if (jwtUtil.isTokenValid(refreshToken, user.getUsername())) {
-                String newAccessToken = jwtUtil.generateAccessToken(user);
-                return AuthResponse.builder()
-                        .accessToken(newAccessToken)
-                        .refreshToken(refreshToken)
-                        .build();
-            }
+        if (!jwtUtil.isRefreshToken(refreshToken)) {
+            throw new UnauthorizedException("Невалидный Refresh Token");
         }
-        throw new RuntimeException("Невалидный Refresh Token");
+
+        String username = jwtUtil.extractUsername(refreshToken);
+        if (username == null) {
+            throw new UnauthorizedException("Невалидный Refresh Token");
+        }
+
+        BaseUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("Пользователь не найден"));
+
+        if (!jwtUtil.isTokenValid(refreshToken, user.getUsername())) {
+            throw new UnauthorizedException("Невалидный Refresh Token");
+        }
+
+        return AuthResponse.builder()
+                .accessToken(jwtUtil.generateAccessToken(user))
+                .refreshToken(refreshToken)
+                .build();
     }
 }

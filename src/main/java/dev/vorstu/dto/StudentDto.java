@@ -8,7 +8,10 @@ import lombok.Data;
 @Data
 public class StudentDto {
     private Long id;
+
+    @NotBlank(message = "Имя пользователя обязательно")
     private String username;
+
     private Role role;
 
     @NotBlank(message = "ФИО не может быть пустым")
@@ -18,7 +21,6 @@ public class StudentDto {
     @NotBlank(message = "Название группы не может быть пустым")
     private String groupName;
 
-    @NotBlank(message = "Пароль обязателен при создании")
     @Size(min = 4, message = "Пароль должен быть не менее 4 символов")
     private String password;
 }
