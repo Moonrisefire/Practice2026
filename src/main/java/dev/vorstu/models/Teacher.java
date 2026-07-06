@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -24,5 +25,5 @@ public class Teacher extends BaseUser {
     @ElementCollection
     @CollectionTable(name = "teacher_groups", joinColumns = @JoinColumn(name = "teacher_id"))
     @Column(name = "group_name")
-    private Set<String> assignedGroups;
+    private Set<String> assignedGroups = new HashSet<>();
 }

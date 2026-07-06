@@ -1,8 +1,6 @@
 package dev.vorstu.config;
 
 import dev.vorstu.util.JwtUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,24 +23,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String username;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        username = jwtUtil.extractUsername(jwt);
+        String jwt = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            if (jwtUtil.isTokenValid(jwt, username)) {
-                String role = jwtUtil.extractClaim(jwt, claims -> claims.get("role", String.class));
+            if (jwtUtil.isTokenValid(jwt, username) && jwtUtil.isAccessToken(jwt)) {
+                String role = jwtUtil.extractClaim(jwt, claims -> claims.get(JwtUtil.CLAIM_ROLE, String.class));
 
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + role)
