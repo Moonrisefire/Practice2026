@@ -157,6 +157,9 @@ public class AdminService {
 
     @Transactional
     public AdminDto createAdmin(AdminDto adminDto) {
+        if (adminDto.getPassword() == null || adminDto.getPassword().isBlank()) {
+            throw new BadRequestException("Пароль обязателен при создании");
+        }
         if (userRepository.findByUsername(adminDto.getUsername()).isPresent()) {
             throw new ConflictException("Пользователь с таким именем уже существует");
         }

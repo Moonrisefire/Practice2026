@@ -2,6 +2,7 @@ package dev.vorstu.dto;
 
 import dev.vorstu.models.Role;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -21,6 +22,6 @@ public class StudentDto {
     @NotBlank(message = "Название группы не может быть пустым")
     private String groupName;
 
-    @Size(min = 4, message = "Пароль должен быть не менее 4 символов")
+    @Pattern(regexp = "^$|^.{4,}$", message = "Пароль должен быть не менее 4 символов")
     private String password;
 }
