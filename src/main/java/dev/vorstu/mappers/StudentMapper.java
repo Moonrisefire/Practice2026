@@ -12,5 +12,6 @@ public interface StudentMapper {
     @Mapping(target = "password", ignore = true)
     StudentDto toDto(Student student);
     Student toEntity(StudentDto studentDto);
+    @Mapping(target = "password", ignore = true)
     void updateStudentFromDto(StudentDto dto, @MappingTarget Student student);
 }

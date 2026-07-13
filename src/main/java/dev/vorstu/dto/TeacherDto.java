@@ -3,6 +3,7 @@ package dev.vorstu.dto;
 import dev.vorstu.validation.ValidEmail;
 import dev.vorstu.validation.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,6 +27,6 @@ public class TeacherDto {
 
     private Set<String> assignedGroups;
 
-    @Size(min = 4, message = "Пароль должен быть не менее 4 символов")
+    @Pattern(regexp = "^$|^.{4,}$", message = "Пароль должен быть не менее 4 символов")
     private String password;
 }

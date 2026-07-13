@@ -12,5 +12,6 @@ public interface TeacherMapper {
     @Mapping(target = "password", ignore = true)
     TeacherDto toDto(Teacher teacher);
     Teacher toEntity(TeacherDto teacherDto);
+    @Mapping(target = "password", ignore = true)
     void updateTeacherFromDto(TeacherDto dto, @MappingTarget Teacher teacher);
 }
