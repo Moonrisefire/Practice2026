@@ -179,6 +179,7 @@ document.getElementById('admin-tabs').addEventListener('click', (e) => {
   document.querySelectorAll('#section-admin .tab-panel').forEach(p => {
     p.classList.toggle('active', p.id === `admin-${tab}`);
   });
+  if (tab === 'csv') loadRegistrationRequests();
 });
 
 async function loadAdminData() {
@@ -552,6 +553,70 @@ document.getElementById('csv-upload-form').addEventListener('submit', async (e) 
     el.innerHTML = `<pre class="json">${esc(JSON.stringify(result, null, 2))}</pre>`;
     showStatus(`Загружено: ${result.created?.length || 0}, ошибок: ${result.errors?.length || 0}`, 'success');
     e.target.reset();
+    await pollRegistrationRequestsAfterUpload(result.created?.length || 0);
+  } catch (err) {
+    await handleError(err);
+  }
+});
+
+async function pollRegistrationRequestsAfterUpload(expectedCount) {
+  const delays = [1000, 2000, 3000, 5000];
+  for (const delay of delays) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    await loadRegistrationRequests();
+    const rows = document.querySelectorAll('#registration-requests-table tbody tr');
+    if (rows.length >= expectedCount) {
+      const pendingEmails = [...rows].filter((row) => {
+        const cells = row.querySelectorAll('td');
+        const emailStatus = cells[4]?.textContent?.trim();
+        return emailStatus === 'PENDING';
+      });
+      if (pendingEmails.length === 0) break;
+    }
+  }
+}
+
+async function loadRegistrationRequests() {
+  try {
+    const requests = await api('GET', '/api/admin/registration-requests?status=PENDING');
+    const container = document.getElementById('registration-requests-table');
+    container.innerHTML = renderTable(
+      [
+        { key: 'id', label: 'ID' },
+        { key: 'fio', label: 'ФИО' },
+        { key: 'email', label: 'Email' },
+        { key: 'status', label: 'Статус заявки' },
+        { key: 'emailStatus', label: 'Статус письма' },
+        { key: 'emailAttempts', label: 'Попытки' },
+        { key: 'lastEmailError', label: 'Ошибка' },
+        {
+          key: 'actions',
+          label: 'Действия',
+          render: (r) => r.emailStatus !== 'SENT'
+            ? `<button class="small" data-resend-email="${r.id}">Повторить отправку</button>`
+            : '—'
+        }
+      ],
+      requests
+    );
+  } catch (err) {
+    await handleError(err);
+  }
+}
+
+document.getElementById('refresh-registration-requests').addEventListener('click', () => {
+  clearStatus();
+  loadRegistrationRequests();
+});
+
+document.getElementById('registration-requests-table').addEventListener('click', async (e) => {
+  const resendId = e.target.dataset.resendEmail;
+  if (!resendId) return;
+  clearStatus();
+  try {
+    await api('POST', `/api/admin/registration-requests/${resendId}/resend-email`);
+    showStatus('Повторная отправка письма инициирована', 'success');
+    await loadRegistrationRequests();
   } catch (err) {
     await handleError(err);
   }

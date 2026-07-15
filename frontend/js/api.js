@@ -49,7 +49,7 @@ export async function api(method, path, body, options = {}) {
   const res = await fetch(`${getApiBase()}${path}`, fetchOptions);
   const data = await parseResponse(res);
 
-  if (res.status === 401 && auth && retry) {
+  if ((res.status === 401 || res.status === 403) && auth && retry) {
     try {
       await refreshTokens();
       return api(method, path, body, { ...options, retry: false });

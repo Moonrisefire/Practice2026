@@ -1,0 +1,26 @@
+ФИО,роль,email,группа
+Алексеев Алексей Алексеевич,студент,reg01@example.com,VM
+Борисова Анна Сергеевна,студент,reg02@example.com,VM
+Волков Виктор Петрович,студент,reg03@example.com,VM
+Григорьева Елена Ивановна,студент,reg04@example.com,AM
+Дмитриев Дмитрий Олегович,студент,reg05@example.com,AM
+Егорова Мария Александровна,студент,reg06@example.com,AM
+Жуков Игорь Николаевич,студент,reg07@example.com,VM
+Зайцева Ольга Владимировна,студент,reg08@example.com,VM
+Иванов Кирилл Андреевич,студент,reg09@example.com,PM
+Козлова Наталья Дмитриевна,студент,reg10@example.com,PM
+Лебедев Павел Сергеевич,студент,reg11@example.com,PM
+Морозова Татьяна Игоревна,студент,reg12@example.com,VM
+Новиков Роман Викторович,студент,reg13@example.com,AM
+Орлова Светлана Павловна,студент,reg14@example.com,AM
+Петров Артём Олегович,студент,reg15@example.com,VM
+Романова Юлия Алексеевна,студент,reg16@example.com,VM
+Соколов Максим Евгеньевич,преподаватель,reg17@example.com,VM
+Тихонова Вероника Сергеевна,преподаватель,reg18@example.com,AM
+Устинов Глеб Николаевич,преподаватель,reg19@example.com,PM
+Федорова Ксения Андреевна,преподаватель,reg20@example.com,PM
+,студент,err-empty-fio@example.com,VM
+Ошибка Email,студент,not-an-email,VM
+Ошибка Группа,студент,err-empty-group@example.com,
+Ошибка Роль,декан,err-bad-role@example.com,VM
+Дубликат Email,студент,reg01@example.com,AM

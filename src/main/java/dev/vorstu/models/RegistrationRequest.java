@@ -43,4 +43,14 @@ public class RegistrationRequest {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RegistrationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "email_status", nullable = false)
+    private EmailDeliveryStatus emailStatus = EmailDeliveryStatus.PENDING;
+
+    @Column(name = "email_attempts", nullable = false)
+    private int emailAttempts = 0;
+
+    @Column(name = "last_email_error", length = 500)
+    private String lastEmailError;
 }

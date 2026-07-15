@@ -1,5 +1,6 @@
 package dev.vorstu.dto;
 
+import dev.vorstu.models.EmailDeliveryStatus;
 import dev.vorstu.models.RegistrationStatus;
 import dev.vorstu.models.Role;
 import lombok.Builder;
@@ -17,4 +18,7 @@ public class RegistrationRequestDto {
     private Role role;
     private RegistrationStatus status;
     private LocalDateTime expiresAt;
+    private EmailDeliveryStatus emailStatus;
+    private int emailAttempts;
+    private String lastEmailError;
 }

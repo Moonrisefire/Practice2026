@@ -113,6 +113,11 @@
           <button type="submit">Загрузить</button>
         </form>
         <div id="csv-result"></div>
+
+        <h3>Заявки на регистрацию</h3>
+        <p class="hint">Письма отправляются асинхронно (режим kafka или worker). При ошибке используйте кнопку «Повторить отправку».</p>
+        <button type="button" id="refresh-registration-requests" class="small">Обновить список</button>
+        <div id="registration-requests-table"></div>
       </div>
     </section>
 

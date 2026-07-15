@@ -7,6 +7,7 @@ import dev.vorstu.exceptions.BadRequestException;
 import dev.vorstu.exceptions.ConflictException;
 import dev.vorstu.exceptions.GoneException;
 import dev.vorstu.exceptions.ResourceNotFoundException;
+import dev.vorstu.models.EmailDeliveryStatus;
 import dev.vorstu.models.RegistrationRequest;
 import dev.vorstu.models.RegistrationStatus;
 import dev.vorstu.models.Role;
@@ -16,6 +17,7 @@ import dev.vorstu.repositories.RegistrationRequestRepository;
 import dev.vorstu.repositories.StudentRepository;
 import dev.vorstu.repositories.TeacherRepository;
 import dev.vorstu.repositories.UserRepository;
+import dev.vorstu.services.email.RegistrationEmailDispatcher;
 import dev.vorstu.validation.EmailValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +45,7 @@ public class RegistrationService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
-    private final EmailService emailService;
+    private final RegistrationEmailDispatcher registrationEmailDispatcher;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${registration.token.ttl-hours:24}")
@@ -144,7 +146,7 @@ public class RegistrationService {
 
                 try {
                     RegistrationRequest request = createPendingRequest(fio, email, groupName, role);
-                    emailService.sendRegistrationLink(email, request.getToken());
+                    registrationEmailDispatcher.dispatch(request.getId(), email, request.getToken());
                     created.add(toDto(request));
                 } catch (Exception e) {
                     errors.add(error(rowNumber, e.getMessage() != null ? e.getMessage() : "Ошибка создания заявки"));
@@ -226,6 +228,34 @@ public class RegistrationService {
         return expired.size();
     }
 
+    @Transactional(readOnly = true)
+    public List<RegistrationRequestDto> getRegistrationRequests(RegistrationStatus status) {
+        List<RegistrationRequest> requests = status != null
+                ? registrationRequestRepository.findByStatus(status)
+                : registrationRequestRepository.findAll();
+        return requests.stream().map(this::toDto).toList();
+    }
+
+    @Transactional
+    public RegistrationRequestDto resendEmail(Long requestId) {
+        RegistrationRequest request = registrationRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена"));
+
+        if (request.getStatus() != RegistrationStatus.PENDING) {
+            throw new BadRequestException("Повторная отправка доступна только для ожидающих заявок");
+        }
+
+        if (request.getEmailStatus() == EmailDeliveryStatus.SENT) {
+            throw new BadRequestException("Письмо уже успешно отправлено");
+        }
+
+        registrationEmailDispatcher.dispatch(request.getId(), request.getEmail(), request.getToken());
+
+        return registrationRequestRepository.findById(requestId)
+                .map(this::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена"));
+    }
+
     private RegistrationRequest createPendingRequest(String fio, String email, String groupName, Role role) {
         RegistrationRequest request = new RegistrationRequest();
         request.setFio(fio);
@@ -267,6 +297,9 @@ public class RegistrationService {
                 .role(request.getRole())
                 .status(request.getStatus())
                 .expiresAt(request.getExpiresAt())
+                .emailStatus(request.getEmailStatus())
+                .emailAttempts(request.getEmailAttempts())
+                .lastEmailError(request.getLastEmailError())
                 .build();
     }
 }

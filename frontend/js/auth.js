@@ -29,7 +29,11 @@ function saveTokens(accessToken, refreshToken) {
 }
 
 export function isAuthenticated() {
-  return !!getAccessToken();
+  const token = getAccessToken();
+  if (!token) return false;
+  const payload = decodeJwt(token);
+  if (!payload?.exp) return false;
+  return payload.exp * 1000 > Date.now();
 }
 
 export function getUsername() {

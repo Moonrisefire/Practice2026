@@ -3,10 +3,12 @@ package dev.vorstu.controllers;
 import dev.vorstu.dto.AdminDto;
 import dev.vorstu.dto.AssignGroupRequest;
 import dev.vorstu.dto.CsvUploadResultDto;
+import dev.vorstu.dto.RegistrationRequestDto;
 import dev.vorstu.dto.StudentCreateDto;
 import dev.vorstu.dto.StudentDto;
 import dev.vorstu.dto.TeacherCreateDto;
 import dev.vorstu.dto.TeacherDto;
+import dev.vorstu.models.RegistrationStatus;
 import dev.vorstu.services.AdminService;
 import dev.vorstu.services.RegistrationService;
 import jakarta.validation.Valid;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,6 +117,17 @@ public class AdminController {
     public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) {
         adminService.deleteAdmin(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/registration-requests")
+    public ResponseEntity<List<RegistrationRequestDto>> getRegistrationRequests(
+            @RequestParam(required = false) RegistrationStatus status) {
+        return ResponseEntity.ok(registrationService.getRegistrationRequests(status));
+    }
+
+    @PostMapping("/registration-requests/{id}/resend-email")
+    public ResponseEntity<RegistrationRequestDto> resendRegistrationEmail(@PathVariable Long id) {
+        return ResponseEntity.ok(registrationService.resendEmail(id));
     }
 
     @PostMapping(value = "/registration-requests", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
