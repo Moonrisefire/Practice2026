@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice2026 — Тестовый фронтенд</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Practice2026</h1>
+    <label>
+      API URL
+      <input type="text" id="api-base-input" value="http://localhost:8080">
+    </label>
+    <span class="user-info" id="user-info" hidden></span>
+    <button type="button" id="logout-btn" hidden>Выйти</button>
+  </header>
+
+  <main>
+    <div id="status"></div>
+
+    <!-- Login -->
+    <section id="section-login" class="section">
+      <h2>Вход</h2>
+      <form id="login-form">
+        <label class="field">
+          Логин
+          <input type="text" id="login-username" required autocomplete="username">
+        </label>
+        <label class="field">
+          Пароль
+          <input type="password" id="login-password" required autocomplete="current-password">
+        </label>
+        <button type="submit">Войти</button>
+      </form>
+      <div class="login-hints">
+        <p>Тестовые учётки:</p>
+        <ul>
+          <li><code>admin</code> / <code>1234</code> — администратор</li>
+          <li><code>teacher_ivanov</code> / <code>secure_pass_1</code> — преподаватель</li>
+          <li><code>student_petrov</code> / <code>secure_pass_2</code> — студент</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Confirm registration -->
+    <section id="section-confirm" class="section">
+      <h2>Подтверждение регистрации</h2>
+      <form id="confirm-form">
+        <label class="field">
+          Token
+          <input type="text" id="confirm-token" required placeholder="UUID из ссылки или MailHog">
+        </label>
+        <button type="submit">Подтвердить</button>
+      </form>
+      <div id="confirm-result"></div>
+    </section>
+
+    <!-- Admin -->
+    <section id="section-admin" class="section">
+      <h2>Панель администратора</h2>
+      <div class="tabs" id="admin-tabs">
+        <button class="tab active" data-tab="students">Студенты</button>
+        <button class="tab" data-tab="teachers">Преподаватели</button>
+        <button class="tab" data-tab="admins">Админы</button>
+        <button class="tab" data-tab="csv">CSV-регистрация</button>
+      </div>
+
+      <div id="admin-students" class="tab-panel active">
+        <h3>Студенты</h3>
+        <form id="student-create-form">
+          <label class="field">Логин <input name="username" required></label>
+          <label class="field">ФИО <input name="fio" required></label>
+          <label class="field">Группа <input name="groupName" required></label>
+          <label class="field">Пароль <input name="password" type="password" required minlength="4"></label>
+          <button type="submit">Создать</button>
+        </form>
+        <div id="students-table"></div>
+      </div>
+
+      <div id="admin-teachers" class="tab-panel">
+        <h3>Преподаватели</h3>
+        <form id="teacher-create-form">
+          <label class="field">Логин <input name="username" required></label>
+          <label class="field">ФИО <input name="fio" required></label>
+          <label class="field">Email <input name="email" type="email" required></label>
+          <label class="field">Телефон <input name="phone" placeholder="+79001234567"></label>
+          <label class="field">Пароль <input name="password" type="password" required minlength="4"></label>
+          <button type="submit">Создать</button>
+        </form>
+        <div id="teachers-table"></div>
+      </div>
+
+      <div id="admin-admins" class="tab-panel">
+        <h3>Администраторы</h3>
+        <form id="admin-create-form">
+          <label class="field">Логин <input name="username" required></label>
+          <label class="field">Пароль <input name="password" type="password" required minlength="4"></label>
+          <button type="submit">Создать</button>
+        </form>
+        <div id="admins-table"></div>
+      </div>
+
+      <div id="admin-csv" class="tab-panel">
+        <h3>Загрузка CSV</h3>
+        <p class="hint">Формат заголовка: <code>ФИО,роль,email,группа</code>. Роли: <code>студент</code> / <code>преподаватель</code> (или student/teacher).</p>
+        <form id="csv-upload-form">
+          <label class="field">
+            CSV-файл
+            <input type="file" name="file" accept=".csv" required>
+          </label>
+          <button type="submit">Загрузить</button>
+        </form>
+        <div id="csv-result"></div>
+      </div>
+    </section>
+
+    <!-- Teacher -->
+    <section id="section-teacher" class="section">
+      <h2>Панель преподавателя</h2>
+      <h3>Мои студенты</h3>
+      <div id="teacher-students-table"></div>
+    </section>
+
+    <!-- Student -->
+    <section id="section-student" class="section">
+      <h2>Панель студента</h2>
+      <h3>Мой профиль</h3>
+      <form id="student-self-form">
+        <label class="field">
+          ФИО
+          <input name="fio" id="student-fio-input" required>
+        </label>
+        <button type="submit">Сохранить</button>
+      </form>
+      <h3>Одногруппники</h3>
+      <div id="classmates-table"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
